@@ -1,0 +1,4 @@
+[submodule "narflib"]
+	path = narflib
+	url = https://github.com/narfblock/narflib.git
+	branch = master
