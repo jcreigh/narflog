@@ -97,8 +97,8 @@ endif()
 
 set(CMAKE_C_FLAGS "${COMMON_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${COMMON_CXX_FLAGS}")
-set(TEST OFF)
-add_subdirectory(${CMAKE_SOURCE_DIR}/narflib)
+
+set(NARFLIB_INCLUDE_DIRS narflib/include)
 
 include_directories (
 	"${NARFLIB_INCLUDE_DIRS}"
@@ -143,6 +143,9 @@ if(NARFLOG_TEST)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_LINKED_AS_SHARED_LIBRARY=1")
 
 	add_executable (narflog-test src/test.cpp)
+
+	set(TEST OFF)
+	add_subdirectory(${CMAKE_SOURCE_DIR}/narflib)
 
 	target_link_libraries (narflog-test
 		narflog
