@@ -15,11 +15,10 @@ A small and narftastic C++ logging library with levels, subloggers, and views.
 First get a copy of the source:
 
 	git clone https://github.com/jcreigh/narflog.git
-	cd narflog
-	git submodule update --init
 
 Make a new directory to build everything in
 
+	cd narflog
 	mkdir build
 	cd build
 
