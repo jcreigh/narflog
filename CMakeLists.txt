@@ -1,11 +1,13 @@
 cmake_minimum_required (VERSION 2.6)
 project (NarfLog)
 
-option(NARFLOG_TEST "Build narflog unit tests" OFF)
+option(TEST "Build narflog unit tests" OFF)
 option(STATIC "Use static linking when building executables" OFF)
 option(STATIC_LIBSTDCXX "Static link libstdc++" OFF)
 option(STATIC_LIBGCC "Static link libgcc" OFF)
 option(PIE "Create position-independent executables" ON)
+
+set(EXT_PROJECTS_DIR ${CMAKE_SOURCE_DIR}/ext)
 
 get_directory_property(hasParent PARENT_DIRECTORY)
 
@@ -23,9 +25,11 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL Clang)
 	set(CMAKE_COMPILER_IS_CLANG 1)
 endif ()
 
-if (NARFLOG_TEST)
+if (TEST)
 	find_package (GTest REQUIRED)
 endif ()
+
+add_subdirectory(${EXT_PROJECTS_DIR}/narflib)
 
 if (hasParent)
 	set(STATIC ON)
@@ -98,8 +102,6 @@ endif()
 set(CMAKE_C_FLAGS "${COMMON_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${COMMON_CXX_FLAGS}")
 
-set(NARFLIB_INCLUDE_DIRS narflib/include)
-
 include_directories (
 	"${NARFLIB_INCLUDE_DIRS}"
 	"include/"
@@ -120,8 +122,10 @@ if(STATIC)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${STATIC_C_FLAGS}")
 	endif()
 	add_library (narflog STATIC ${NARFLOG_SOURCE_FILES})
+	add_dependencies(narflog narflib)
 else()
 	add_library (narflog SHARED ${NARFLOG_SOURCE_FILES})
+	add_dependencies(narflog narflib)
 	target_link_libraries (narflog)
 endif()
 
@@ -132,7 +136,7 @@ if (CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 		)
 endif ()
 
-if(NARFLOG_TEST)
+if(TEST)
 	include_directories ( "${GTEST_INCLUDE_DIRS}")
 
 	if (NOT hasParent)
@@ -143,13 +147,11 @@ if(NARFLOG_TEST)
 	SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DGTEST_LINKED_AS_SHARED_LIBRARY=1")
 
 	add_executable (narflog-test src/test.cpp)
-
-	set(TEST OFF)
-	add_subdirectory(${CMAKE_SOURCE_DIR}/narflib)
+	add_dependencies(narflog-test narflib)
 
 	target_link_libraries (narflog-test
 		narflog
-		narflib
+		${NARFLIB_LIBS_DIR}/libnarflib.a
 		${GTEST_LIBRARIES}
 		)
 endif()

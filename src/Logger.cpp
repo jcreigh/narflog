@@ -15,6 +15,7 @@ std::vector<Logger::Entry> Logger::entries;
 std::vector<Logger::View*> Logger::views;
 std::map<std::string, Logger::Level> Logger::prefs;
 Logger::Level Logger::defaultLevel = Logger::Level::INHERIT;
+narf::Signal<void (int)> Logger::globalSignal;
 
 std::string rotateFile(std::string path, int n = 0) {
 	std::string newPath = path + (n > 0 ? narf::util::format(".%d", n) : "");
@@ -61,12 +62,12 @@ Logger::Logger(std::string name, Logger* parent /*= nullptr*/) : name(name), par
 	auto pref = prefs.find(name);
 	if (pref != prefs.end()) {
 		verbosity = pref->second;
-		printf("Initializing logger \"%s\" at %s (from pref)\n", name.c_str(), levelNames[verbosity].c_str());
+		//printf("Initializing logger \"%s\" at %s (from pref)\n", name.c_str(), levelNames[verbosity].c_str());
 		return;
 	} else {
 		verbosity = defaultLevel;
 	}
-	printf("Initializing logger \"%s\" at %s\n", name.c_str(), levelNames[verbosity].c_str());
+	//printf("Initializing logger \"%s\" at %s\n", name.c_str(), levelNames[verbosity].c_str());
 }
 
 void Logger::log(Logger::Level level, std::string msg, Logger* baseLogger /*= nullptr*/) {
@@ -87,6 +88,9 @@ void Logger::log(Logger::Level level, std::string msg, Logger* baseLogger /*= nu
 	entries.push_back(entry);
 	int newestID = (int)entries.size() - 1;
 	loggingMutex.unlock();
+
+	signal.emit(newestID);
+	globalSignal.emit(newestID);
 
 	for (auto& view : views) {
 		view->notify(newestID);

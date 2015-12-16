@@ -10,11 +10,13 @@ namespace narf {
 
 Logger::View::View(Logger::Level verbosity /* = Logger::Level::WARN */, bool showTimestamps /* = true */) : defaultVerbosity(verbosity), showingTimestamps(showTimestamps){
 	rescan();
-	Logger::views.push_back(this);
+	slotID = Logger::globalSignal += [this](int newID) { this->notify(newID); };
+	//Logger::views.push_back(this);
 }
 
 Logger::View::~View() {
-	Logger::views.erase(std::remove(Logger::views.begin(), Logger::views.end(), this), Logger::views.end());
+	Logger::globalSignal -= slotID;
+	//Logger::views.erase(std::remove(Logger::views.begin(), Logger::views.end(), this), Logger::views.end());
 }
 
 void Logger::View::dumpEntries(std::ostream* out, int start /* = 0 */, int count /* = -1 */) {

@@ -20,6 +20,7 @@
 #include <unordered_map>
 #include <sys/stat.h>
 #include "narf/format.h"
+#include "narf/signal.h"
 #include "narf/path.h"
 
 #ifndef NARF_LOGGER_BASEPATH
@@ -59,6 +60,7 @@ class Logger {
 				std::map<std::string, Level> levels;
 				Level defaultVerbosity;
 				bool showingTimestamps;
+				size_t slotID;
 				void rescan();
 			public:
 				View(Level verbosity = Level::WARN, bool showTimestamps = true) /*: defaultVerbosity(verbosity), showingTimestamps(showTimestamps)*/;
@@ -96,6 +98,8 @@ class Logger {
 	public:
 		static std::ostream* createFileLogger(std::string path);
 		static Logger* getLogger(std::string name = "");
+		static narf::Signal<void (int)> globalSignal;
+		narf::Signal<void (int)> signal;
 		static void reset();
 		static void loadDefaultPrefs(const std::map<std::string, Level>& inPrefs);
 		static void setDefaultLevel(Level level) { defaultLevel = level; }
