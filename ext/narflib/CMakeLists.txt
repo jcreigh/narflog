@@ -10,6 +10,8 @@ ExternalProject_Add(narflib
 	           -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
 	           -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
 	           -DCMAKE_CXX_FLAGS=${MSVC_COMPILER_DEFS}
+	           -DUSEPNG=OFF
+	           -DUSEZLIB=OFF
 	           -DTEST=OFF
 	PREFIX "${CMAKE_CURRENT_BINARY_DIR}"
 	# Disable install step
