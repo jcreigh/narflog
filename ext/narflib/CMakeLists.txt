@@ -1,7 +1,5 @@
-cmake_minimum_required(VERSION 2.8.8)
+cmake_minimum_required(VERSION 2.8)
 project(narflib_builder C CXX)
-cmake_policy(SET CMP0054 NEW)
-
 include(ExternalProject)
 
 ExternalProject_Add(narflib
@@ -20,7 +18,7 @@ ExternalProject_Add(narflib
 
 # Specify include dir
 ExternalProject_Get_Property(narflib source_dir)
-set(NARFLIB_INCLUDE_DIRS ${source_dir}/include PARENT_SCOPE)
+set(NARFLIB_INCLUDE_DIR ${source_dir}/include PARENT_SCOPE)
 
 # Specify MainTest's link libraries
 ExternalProject_Get_Property(narflib binary_dir)
