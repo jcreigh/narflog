@@ -1,0 +1,77 @@
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies { classpath "org.ajoberstar:gradle-git:1.6.0" }
+}
+
+apply plugin: "org.ajoberstar.grgit"
+apply plugin: "cpp"
+
+// Clone narflib repo if it doesn't exist
+if (!file("$buildDir/narflib").exists())  {
+	//org.ajoberstar.grgit.Grgit.clone(dir: "$buildDir/narflib", uri: "https://github.com/narfblock/narflib.git")
+	org.ajoberstar.grgit.Grgit.clone(dir: "$buildDir/narflib", uri: "/home/jess/src/narflib")
+}
+
+evaluationDependsOn(':narflib')
+
+def configTokens = [
+	VERSION_MAJOR: VERSION_MAJOR.toString(),
+	VERSION_MINOR: VERSION_MINOR.toString(),
+	VERSION_RELEASE: VERSION_RELEASE.toString(),
+	VERSION_REV: ""
+]
+
+task gitRevision(type: Exec) {
+	commandLine "git", "describe", "--tags", "--always", "--dirty"
+	standardOutput = new ByteArrayOutputStream()
+	ext.output = {
+		return standardOutput.toString().trim()
+	}
+}
+
+gitRevision.doLast {
+	configTokens["VERSION_REV"] = gitRevision.output()
+}
+
+import org.apache.tools.ant.filters.ReplaceTokens
+task initConfig(type: Copy, dependsOn: [gitRevision]) {
+	outputs.upToDateWhen { false }
+	from "include/narf/version.h.in"
+	into ("$buildDir/include/narf/")
+	filter(ReplaceTokens, tokens: configTokens)
+	rename '(.*).in', '$1'
+}
+
+model {
+	components {
+		narflog(NativeLibrarySpec) {
+			sources {
+				cpp {
+					source {
+						srcDir "src"
+						include "**/*.cpp"
+					}
+					exportedHeaders {
+						srcDirs = ["include", "$buildDir/narflib/include"]
+						includes = ['**/*.h']
+					}
+				}
+			}
+		}
+	}
+	binaries {
+		all {
+			cppCompiler.args "--std=c++11"
+			tasks.withType(CppCompile) {
+				dependsOn initConfig
+				dependsOn ":narflib:narflibStaticLibrary"
+			}
+		}
+	}
+}
+
+task wrapper(type: Wrapper) {
+	gradleVersion = '3.2.1'
+}

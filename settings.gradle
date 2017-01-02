@@ -1,0 +1,2 @@
+include ":narflib"
+project(":narflib").projectDir = new File(settingsDir, "build/narflib")
